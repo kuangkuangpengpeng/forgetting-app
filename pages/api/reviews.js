@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   }
   
   if (req.method === 'GET') {
+    // 获取用户的复习记录
     const { data, error } = await supabase
       .from('reviews')
       .select('*')
@@ -21,12 +22,14 @@ export default async function handler(req, res) {
   }
   
   if (req.method === 'POST') {
+    // 创建复习记录
     const { cardId, quality } = req.body;
     
     if (!cardId || quality === undefined) {
       return res.status(400).json({ error: '缺少必要字段' });
     }
     
+    // 获取已有的复习记录（如果有）
     const { data: existingReview, error: reviewError } = await supabase
       .from('reviews')
       .select('*')
@@ -34,10 +37,11 @@ export default async function handler(req, res) {
       .eq('card_id', cardId)
       .single();
     
-    if (reviewError && reviewError.code !== 'PGRST116') {
+    if (reviewError && reviewError.code !== 'PGRST116') { // 忽略"未找到"错误
       return res.status(500).json({ error: reviewError.message });
     }
     
+    // 基于SM-2算法计算下次复习时间
     let easeFactor = existingReview?.ease_factor || 2.5;
     let interval = existingReview?.interval || 1;
     let repetitions = existingReview?.repetitions || 0;
@@ -56,7 +60,9 @@ export default async function handler(req, res) {
       interval = 1;
     }
     
-    easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    // 修复语法错误：使用临时变量计算调整值
+    const adjustment = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02);
+    easeFactor = Math.max(1.3, easeFactor + adjustment);
     
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + interval);
