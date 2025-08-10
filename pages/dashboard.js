@@ -131,7 +131,9 @@ export default function Dashboard() {
       interval = 1;
     }
 
-    easeFactor = Math.max(1.3, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+    // 修复语法错误：使用临时变量计算调整值
+    const adjustment = 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02);
+    easeFactor = Math.max(1.3, easeFactor + adjustment);
 
     const nextReview = new Date();
     nextReview.setDate(nextReview.getDate() + interval);
