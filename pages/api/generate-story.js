@@ -1,7 +1,13 @@
 import { supabase } from '../../utils/supabaseClient';
-import OpenAI from "openai";
 
 export default async function handler(req, res) {
+  // 检查功能是否启用
+  if (process.env.NEXT_PUBLIC_AI_STORY_ENABLED !== 'true') {
+    return res.status(503).json({ 
+      error: 'AI故事功能已暂时禁用' 
+    });
+  }
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -18,32 +24,42 @@ export default async function handler(req, res) {
   }
 
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-
     const prompt = `请使用以下英语单词创作一个200字以内的短篇故事，故事要有趣、有教育意义，适合英语学习者阅读。单词：${words.join(', ')}。故事中要自然地融入这些单词，并在每个目标单词后标注中文释义。故事语言为中文，但保留英语单词。`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "你是一位英语老师和儿童文学作家，擅长创作包含特定英语单词的趣味故事"
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.8,
-      max_tokens: 500
+    const response = await fetch('https://api.deepseek.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          {
+            role: "system",
+            content: "你是一位英语老师和儿童文学作家，擅长创作包含特定英语单词的趣味故事"
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 500
+      })
     });
 
-    const storyContent = response.choices[0].message.content;
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`DeepSeek API错误: ${errorData.error?.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const storyContent = data.choices[0].message.content;
     const title = `包含 ${words.length} 个单词的故事`;
 
-    const { data, error } = await supabase
+    // 保存到数据库
+    const { data: storyData, error } = await supabase
       .from('stories')
       .insert([
         { 
@@ -63,6 +79,8 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('故事生成失败:', error);
-    res.status(500).json({ error: '故事生成失败，请重试' });
+    res.status(500).json({ 
+      error: '故事生成失败，请重试: ' + error.message 
+    });
   }
 }
