@@ -1,15 +1,25 @@
 import { useState } from 'react';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 
 export default function StoryCard({ story, onDelete }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
+  // 使用原生JavaScript格式化日期
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
-  
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -20,7 +30,7 @@ export default function StoryCard({ story, onDelete }) {
       setIsDeleting(false);
     }
   };
-  
+
   return (
     <div className="border rounded-lg overflow-hidden shadow-sm bg-white mb-4">
       <div className="p-4">
@@ -28,10 +38,9 @@ export default function StoryCard({ story, onDelete }) {
           <div>
             <h3 className="text-lg font-medium text-gray-900">{story.title}</h3>
             <p className="text-sm text-gray-500 mt-1">
-              {format(new Date(story.created_at), 'yyyy年MM月dd日 HH:mm', { locale: zhCN })}
+              {formatDate(story.created_at)}
             </p>
           </div>
-          
           <div className="flex space-x-2">
             <button
               onClick={toggleExpand}
@@ -48,23 +57,23 @@ export default function StoryCard({ story, onDelete }) {
             </button>
           </div>
         </div>
-        
         <div className="mt-3 flex flex-wrap gap-2">
           {story.words.map((word, index) => (
-            <span 
-              key={index} 
+            <span
+              key={index}
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
             >
               {word}
             </span>
           ))}
         </div>
-        
         {isExpanded && (
           <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="prose prose-indigo max-w-none">
+            <div className="prose prose-sm max-w-none">
               {story.content.split('\n').map((paragraph, idx) => (
-                <p key={idx} className="text-gray-700 mb-3">{paragraph}</p>
+                <p key={idx} className="text-gray-700 mb-3">
+                  {paragraph}
+                </p>
               ))}
             </div>
           </div>
