@@ -17,6 +17,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('review');
   const [showStories, setShowStories] = useState(false);
+  
+  // 获取AI功能开关状态
+  const aiStoryEnabled = process.env.NEXT_PUBLIC_AI_STORY_ENABLED === 'true';
 
   useEffect(() => {
     const session = supabase.auth.session();
@@ -26,7 +29,9 @@ export default function Dashboard() {
       setUser(session.user);
       fetchCards(session.user.id);
       fetchReviews(session.user.id);
-      fetchStories(session.user.id);
+      if (aiStoryEnabled) {
+        fetchStories(session.user.id);
+      }
     }
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
@@ -38,7 +43,7 @@ export default function Dashboard() {
     return () => {
       authListener?.unsubscribe();
     };
-  }, []);
+  }, [aiStoryEnabled]);
 
   const fetchCards = async (userId) => {
     setLoading(true);
@@ -204,16 +209,21 @@ export default function Dashboard() {
                 >
                   知识点管理
                 </button>
-                <button
-                  onClick={() => setActiveTab('stories')}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    activeTab === 'stories'
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  故事复习
-                </button>
+                
+                {/* 根据开关显示故事复习标签 */}
+                {aiStoryEnabled && (
+                  <button
+                    onClick={() => setActiveTab('stories')}
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                      activeTab === 'stories'
+                        ? 'border-indigo-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    故事复习
+                  </button>
+                )}
+                
                 <button
                   onClick={() => setActiveTab('stats')}
                   className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
@@ -256,7 +266,7 @@ export default function Dashboard() {
                     key={card.id} 
                     card={card} 
                     onReview={handleReview} 
-                    stories={stories}
+                    stories={aiStoryEnabled ? stories : []}
                   />
                 ))}
               </div>
@@ -296,10 +306,11 @@ export default function Dashboard() {
           </div>
         )}
 
-        {activeTab === 'stories' && (
+        {/* 根据开关显示故事复习内容 */}
+        {aiStoryEnabled && activeTab === 'stories' && (
           <div className="bg-white shadow rounded-lg p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">AI故事复习</h2>
+              <h2 className="text-2xl font-bold text-gray-900">AI故事复习 (DeepSeek)</h2>
               <button
                 onClick={() => setShowStories(!showStories)}
                 className="text-indigo-600 hover:text-indigo-800 text-sm font-medium"
