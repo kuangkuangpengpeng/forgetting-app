@@ -72,7 +72,7 @@ export default function StoryGenerator({ onStoryCreated }) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">AI故事生成器</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">DeepSeek 故事生成器</h3>
       
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
@@ -116,7 +116,7 @@ export default function StoryGenerator({ onStoryCreated }) {
           type="button"
           onClick={generateStory}
           disabled={isGenerating || selectedWords.length < 3}
-          className={`px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-md hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+          className={`px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-md hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
             isGenerating || selectedWords.length < 3 ? 'opacity-50 cursor-not-allowed' : ''
           }`}
         >
@@ -126,10 +126,10 @@ export default function StoryGenerator({ onStoryCreated }) {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              生成中...
+              DeepSeek生成中...
             </span>
           ) : (
-            '生成故事'
+            '使用DeepSeek生成故事'
           )}
         </button>
       </div>
