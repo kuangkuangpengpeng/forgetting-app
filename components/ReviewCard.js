@@ -47,43 +47,48 @@ export default function ReviewCard({ card, onReview, stories }) {
           <div className="mt-6">
             <p className="text-gray-700 text-lg">{card.back}</p>
             
-            {showStoryOption ? (
-              <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
-                <p className="text-sm text-yellow-800 mb-2">
-                  包含此单词的故事:
-                </p>
-                <div className="prose prose-sm max-w-none">
-                  {storiesWithWord.map(story => (
-                    <div key={story.id} className="mb-3">
-                      <p className="text-gray-700">{story.content}</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(story.created_at).toLocaleDateString()}
-                      </p>
+            {/* 只在有可用故事时显示 */}
+            {stories.length > 0 && (
+              <>
+                {showStoryOption ? (
+                  <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-sm text-yellow-800 mb-2">
+                      包含此单词的故事:
+                    </p>
+                    <div className="prose prose-sm max-w-none">
+                      {storiesWithWord.map(story => (
+                        <div key={story.id} className="mb-3">
+                          <p className="text-gray-700">{story.content}</p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {new Date(story.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => setShowStoryOption(false)}
-                  className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
-                >
-                  关闭故事
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  const storiesWithWord = stories.filter(s => 
-                    s.words.includes(card.front)
-                  );
-                  if (storiesWithWord.length > 0) {
-                    setStoriesWithWord(storiesWithWord);
-                    setShowStoryOption(true);
-                  }
-                }}
-                className="mt-4 text-sm text-indigo-600 hover:text-indigo-800"
-              >
-                查看包含此单词的故事
-              </button>
+                    <button
+                      onClick={() => setShowStoryOption(false)}
+                      className="mt-2 text-sm text-indigo-600 hover:text-indigo-800"
+                    >
+                      关闭故事
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      const storiesWithWord = stories.filter(s => 
+                        s.words.includes(card.front)
+                      );
+                      if (storiesWithWord.length > 0) {
+                        setStoriesWithWord(storiesWithWord);
+                        setShowStoryOption(true);
+                      }
+                    }}
+                    className="mt-4 text-sm text-indigo-600 hover:text-indigo-800"
+                  >
+                    查看包含此单词的故事
+                  </button>
+                )}
+              </>
             )}
             
             <div className="mt-8">
